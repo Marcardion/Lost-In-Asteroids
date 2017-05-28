@@ -285,7 +285,6 @@ GameState.prototype.batCollision = function(player, bat){
     if(player.body.touching.down && bat.body.touching.up){
         this.enemyDeathSound.play(); // tocando som de morte do morcego
         this.player.body.velocity.y = -200; // adicionando um pequeno impulso vertical ao jogador
-        this.score += 100; // atualizando score
         bat.kill();
     }
     else 
@@ -307,7 +306,6 @@ GameState.prototype.lavaDeath = function(player, lava){
 
 // Condição de derrota: guarde o score e siga para o próximo estado
 GameState.prototype.lose = function(){
-    Globals.score = this.score;
     this.playerDeathSound.play();
     this.game.state.start('lose');
 }
