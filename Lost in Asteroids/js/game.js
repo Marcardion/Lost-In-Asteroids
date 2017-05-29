@@ -17,9 +17,8 @@ GameState.prototype.preload = function() {
 
     // Para carregar um spritesheet, é necessário saber a altura e largura de cada sprite, e o número de sprites no arquivo
     // No caso do player.png, os sprites são de 32x32 pixels, e há 8 sprites no arquivo
-    //this.game.load.spritesheet('astronaut96', 'Assets/spritesheets/astronaut.png', 192, 192, 16);
-   // this.game.load.spritesheet('astronaut64', 'Assets/spritesheets/astronaut_64.png', 64, 64, 16);
-    this.game.load.spritesheet('astronaut', 'Assets/spritesheets/astronaut.png', 96, 96, 16);
+    
+    this.game.load.spritesheet('astronaut', 'Assets/spritesheets/astronaut.png', 96, 96, 24);
     this.game.load.spritesheet('player', 'Assets/spritesheets/player.png', 32, 32, 8);
     this.game.load.spritesheet('items', 'Assets/spritesheets/items.png', 32, 32, 16);
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
@@ -29,10 +28,10 @@ GameState.prototype.preload = function() {
 
     // Para carregar os sons, basta informar a chave e dizer qual é o arquivo
     this.game.load.audio('jumpSound', 'Assets/sounds/jump.wav');
-    this.game.load.audio('pickupSound', 'Assets/sounds/pickup.wav');
+    this.game.load.audio('oxPillSound', 'Assets/sounds/ox_pill.ogg');
     this.game.load.audio('playerDeath', 'Assets/sounds/hurt3.ogg');
     this.game.load.audio('enemyDeath', 'Assets/sounds/hit2.ogg');
-    this.game.load.audio('music', 'Assets/sounds/mystery.wav');
+    this.game.load.audio('music', 'Assets/sounds/phantom_from_space.ogg');
 }
 
 GameState.prototype.create = function() { 
@@ -91,6 +90,7 @@ GameState.prototype.create = function() {
     
     this.astronaut.animations.add('idle', [0, 1, 2], 6);
     this.astronaut.animations.add('walk', [3, 4, 5], 6);
+    this.astronaut.animations.add('walkb', [16, 17, 18], 6);
     this.astronaut.animations.add('jump', [9, 10, 11], 6);
     //COLOCAR DEATH AQUI DEPOIS
     
@@ -149,7 +149,7 @@ GameState.prototype.create = function() {
     // Criando assets de som com this.game.add.audio()
     // O parâmetro é o nome do asset definido no preload()
     this.jumpSound = this.game.add.audio('jumpSound');
-    this.pickupSound = this.game.add.audio('pickupSound');
+    this.oxPillSound = this.game.add.audio('oxPillSound');
     this.playerDeathSound = this.game.add.audio('playerDeath');
     this.enemyDeathSound = this.game.add.audio('enemyDeath');
     
@@ -193,11 +193,25 @@ GameState.prototype.update = function() {
     
     if(this.keys.left.isDown){
         this.astronaut.body.velocity.x = -150;
-        this.astronaut.animations.play('walk');
+        if(this.astronaut.scale.x == -1)
+            {
+               this.astronaut.animations.play('walk'); 
+            }
+        else
+            {
+               this.astronaut.animations.play('walkb');  
+            }
     }
     else if(this.keys.right.isDown){
         this.astronaut.body.velocity.x = 150;  
-        this.astronaut.animations.play('walk');
+        if(this.astronaut.scale.x == -1)
+            {
+               this.astronaut.animations.play('walkb'); 
+            }
+        else
+            {
+               this.astronaut.animations.play('walk');  
+            }
     }
     else {
         this.astronaut.body.velocity.x = 0;
@@ -262,7 +276,7 @@ GameState.prototype.oxPillCollect = function(player, oxPill){
             this.oxygen = 99;
         }
     
-    this.pickupSound.play();
+    this.oxPillSound.play();
     oxPill.kill();
 }
 
