@@ -19,8 +19,10 @@ GameState.prototype.preload = function() {
     // No caso do player.png, os sprites são de 32x32 pixels, e há 8 sprites no arquivo
     
     this.game.load.spritesheet('astronaut', 'Assets/spritesheets/astronaut.png', 96, 96, 24);
+    this.game.load.spritesheet('enemy', 'Assets/spritesheets/enemy.png', 96, 96, 7);
     this.game.load.spritesheet('player', 'Assets/spritesheets/player.png', 32, 32, 8);
-    this.game.load.spritesheet('items', 'Assets/spritesheets/items.png', 32, 32, 16);
+    this.game.load.spritesheet('plasmaBullets', 'Assets/spritesheets/plasma_bullet.png', 64, 64, 7);
+    this.game.load.spritesheet('items', 'Assets/spritesheets/pickupItems.png', 32, 32, 6);
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
     
     // Para carregar um arquivo do Tiled, o mesmo precisa estar no formato JSON
@@ -35,9 +37,9 @@ GameState.prototype.preload = function() {
 }
 
 GameState.prototype.create = function() { 
-    // Inicializando sistema de física
-    // o sistema Arcade é o mais simples de todos, mas também é o mais eficiente em termos de processamento.
-    // https://photonstorm.github.io/phaser-ce/Phaser.Physics.Arcade.html
+    
+    
+    
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     // Para carregar o mapa do Tiled para o Phaser, 3 estágios são necessários:
@@ -76,7 +78,7 @@ GameState.prototype.create = function() {
     // Para o layer de lava é o caso oposto: poucos tiles colidem, então é mais fácil 
     // informar diretamente quais são.
     this.level1.setCollision([5, 6, 13], true, this.lavaLayer);
-        
+    
     this.astronaut = this.game.add.sprite(500,200, 'astronaut', 1);
     this.astronaut.anchor.setTo(0.5,0.5);
     this.game.physics.enable(this.astronaut);
@@ -84,6 +86,14 @@ GameState.prototype.create = function() {
     this.game.camera.follow(this.astronaut);
     // Corrigindo o bounding box do personagem
     this.astronaut.body.setSize(30,80, 35, 16);
+    
+    this.bullet = this.game.add.sprite(500,200, 'plasmaBullets', 1);
+    this.bullet.anchor.setTo(0.5,0.5);
+    this.game.physics.enable(this.bullet);
+    this.bullet.body.setSize(32,32, 15, 15);
+    
+    this.bullet.animations.add('spark', [0, 1, 2, 3, 4], 6, true);
+    this.bullet.animations.play('spark');
     
     this.playerGun = this.game.add.sprite(300,200, 'astronaut', 12);
     this.playerGun.anchor.setTo(0.5, 0.6);
@@ -127,7 +137,7 @@ GameState.prototype.create = function() {
         // body.immovable = true indica que o objeto não é afetado por forças externas
         oxPill.body.immovable = true;
         // Adicionando animações; o parâmetro true indica que a animação é em loop
-        oxPill.animations.add('spin', [4, 5, 6, 7, 6, 5], 6, true);
+        oxPill.animations.add('spin', [0,1,2], 6, true);
         oxPill.animations.play('spin');
     });
 
@@ -178,6 +188,9 @@ GameState.prototype.create = function() {
 
 GameState.prototype.update = function() {
     
+    this.game.debug.body(this.bullet);
+    this.game.debug.body(this.astronaut);
+
     this.updatingGun();
     
     this.game.physics.arcade.collide(this.astronaut, this.wallsLayer);
