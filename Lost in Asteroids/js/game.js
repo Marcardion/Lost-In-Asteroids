@@ -17,6 +17,9 @@ GameState.prototype.preload = function() {
 
     // Para carregar um spritesheet, é necessário saber a altura e largura de cada sprite, e o número de sprites no arquivo
     // No caso do player.png, os sprites são de 32x32 pixels, e há 8 sprites no arquivo
+    //this.game.load.spritesheet('astronaut96', 'Assets/spritesheets/astronaut.png', 192, 192, 16);
+   // this.game.load.spritesheet('astronaut64', 'Assets/spritesheets/astronaut_64.png', 64, 64, 16);
+    this.game.load.spritesheet('astronaut', 'Assets/spritesheets/astronaut.png', 96, 96, 16);
     this.game.load.spritesheet('player', 'Assets/spritesheets/player.png', 32, 32, 8);
     this.game.load.spritesheet('items', 'Assets/spritesheets/items.png', 32, 32, 16);
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
@@ -52,6 +55,7 @@ GameState.prototype.create = function() {
     this.bgLayer = this.level1.createLayer('BG');
     this.lavaLayer = this.level1.createLayer('Lava');
     this.wallsLayer = this.level1.createLayer('Walls');
+    
     // Mais informações sobre tilemaps:
     // https://photonstorm.github.io/phaser-ce/#toc14
 
@@ -74,38 +78,30 @@ GameState.prototype.create = function() {
     // informar diretamente quais são.
     this.level1.setCollision([5, 6, 13], true, this.lavaLayer);
         
-    // Inicializando jogador
-    // Adicionando o sprite do jogador na posição (160, 64) usando o asset 'player'
-    // Como estamos usando um spritesheet, é necessário informar qual sprite vamos usar
-    // A contagem é da mesma forma do que nos tiles do mapa, mas o primeiro sprite recebe
-    // o número 0 ao invés de 1.
-    this.player = this.game.add.sprite(160, 64, 'player', 5);
-    // Ajustando âncora do jogador (ponto de referência para posicionamento)
-    this.player.anchor.setTo(0.5, 0.5);
-    // Ativando física para o jogador
-    this.game.physics.enable(this.player);
-    // Ativando gravidade para o jogador
-    // Como é positiva no eixo Y, o jogador terá uma gravidade "normal",
-    // ou seja, irá acelerar para baixo
-    this.player.body.gravity.y = 750;
-    // Como o "mundo" é maior do que a área visível, é necessário que a câmera siga o jogador.
-    // https://photonstorm.github.io/phaser-ce/Phaser.Camera.html#follow
-    this.game.camera.follow(this.player);
+    this.astronaut = this.game.add.sprite(500,200, 'astronaut', 1);
+    this.astronaut.anchor.setTo(0.5,0.5);
+    this.game.physics.enable(this.astronaut);
+    this.astronaut.body.gravity.y = 400;
+    this.game.camera.follow(this.astronaut);
+    // Corrigindo o bounding box do personagem
+    this.astronaut.body.setSize(30,80, 35, 16);
     
-    // Animações do jogador
-    // Animações, no contexto do Phaser, nada mais são do que sequências de frames do spritesheet
-    // Para criar uma animação, utilizamos animations.add()
-    // Parâmetros: nome da animação, lista de quadros, quadros por segundo da animação
-    // https://photonstorm.github.io/phaser-ce/Phaser.AnimationManager.html
-    this.player.animations.add('walk', [0, 1, 2, 1], 6);
-    this.player.animations.add('idle', [5, 5, 5, 5, 5, 5, 6, 5, 6, 5], 6);
-    this.player.animations.add('jump', [4], 6);
+    this.playerGun = this.game.add.sprite(300,200, 'astronaut', 12);
+    this.playerGun.anchor.setTo(0.5, 0.6);
     
-    // Adicionando entradas
-    // createCursorKeys() cria automaticamente mapeamentos para as 4 teclas de direção
-    // https://photonstorm.github.io/phaser-ce/Phaser.Keyboard.html#createCursorKeys
-    // Lista de teclas disponíveis: https://photonstorm.github.io/phaser-ce/Phaser.KeyCode.html
-    this.keys = this.game.input.keyboard.createCursorKeys();
+    this.astronaut.animations.add('idle', [0, 1, 2], 6);
+    this.astronaut.animations.add('walk', [3, 4, 5], 6);
+    this.astronaut.animations.add('jump', [9, 10, 11], 6);
+    //COLOCAR DEATH AQUI DEPOIS
+    
+    
+    //this.keys = this.game.input.keyboard.createCursorKeys();
+        this.keys = {
+            up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
+            down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
+            left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
+            right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),
+                    };
     this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     
     // Adicionando objetos do Tiled, utilizando grupos
@@ -181,91 +177,83 @@ GameState.prototype.create = function() {
 }
 
 GameState.prototype.update = function() {
-    // Detecção de colisões
-    // Todas as colisões entre os objetos do jogo são avaliadas com arcade.collide() ou 
-    // arcade.overlap(). O Phaser irá automaticamente calcular a colisão dos objetos
-    // Inicialmente, adicionando colisões do player com as paredes da fase, que é um layer:
-    this.game.physics.arcade.collide(this.player, this.wallsLayer);
+    
+    this.updatingGun();
+    
+    this.game.physics.arcade.collide(this.astronaut, this.wallsLayer);
 
-    // Adicionando colisões do jogador com outros elementos, onde há uma função de tratamento
-    // Cada colisão terá um callback, que é o terceiro parâmetro, que irá fazer alguma coisa
-    // sempre que essa quando essa colisão ocorrer; este callback receberá os 2 objetos que 
-    // colidiram; veremos mais abaixo na implementação
-    // Colisão com a lava - o jogador morre
-    this.game.physics.arcade.collide(this.player, this.lavaLayer, this.lavaDeath, null, this);
+  
+    this.game.physics.arcade.collide(this.astronaut, this.lavaLayer, this.lavaDeath, null, this);
    
-    this.game.physics.arcade.overlap(this.player, this.oxPills, this.oxPillCollect, null, this);
+    this.game.physics.arcade.overlap(this.astronaut, this.oxPills, this.oxPillCollect, null, this);
     
-    // Colisão com os morcegos - depende de como foi a colisão, veremos abaixo
-    this.game.physics.arcade.overlap(this.player, this.bats, this.batCollision, null, this);
+    this.game.physics.arcade.overlap(this.astronaut, this.bats, this.batCollision, null, this);
     
-    // Adicionando colisão entre os morcegos e as paredes
     this.game.physics.arcade.collide(this.bats, this.wallsLayer);
     
-    // Movimentação do player
-    // Para detectar se uma das teclas referenciadas foi pressionada,
-    // basta verificar a variável .isDown da mesma
-    // Caso seja a tecla para a esquerda, ajustar uma velocidade negativa
-    // ao eixo X, que fará a posição X diminuir e consequentemente o jogador
-    // ir para a esquerda;
     if(this.keys.left.isDown){
-        this.player.body.velocity.x = -150; // Ajustar velocidade
-        // Se o jogador estiver virado para a direita, inverter a escala para que ele vire para o outro lado
-        if(this.player.scale.x == 1) this.player.scale.x = -1;
-        // Iniciando a animação 'walk'
-        this.player.animations.play('walk');
+        this.astronaut.body.velocity.x = -150;
+        this.astronaut.animations.play('walk');
     }
-    // Se a tecla direita estiver pressionada (this.keys.right.isDown == true),
-    // mover o sprite para a direita
     else if(this.keys.right.isDown){
-        // se a tecla direita estiver pressionada
-        this.player.body.velocity.x = 150;  // Ajustar velocidade
-        // Se o jogador estiver virado para a direita, inverter a escala para que ele vire para o outro lado
-        if(this.player.scale.x == -1) this.player.scale.x = 1;
-        this.player.animations.play('walk');
+        this.astronaut.body.velocity.x = 150;  
+        this.astronaut.animations.play('walk');
     }
     else {
-        // Ajustar velocidade para zero
-        this.player.body.velocity.x = 0;
-        this.player.animations.play('idle');
+        this.astronaut.body.velocity.x = 0;
+        this.astronaut.animations.play('idle');
     }
 
-    // Se o a barra de espaço ou a tecla cima estiverem pressionadas, e o jogador estiver com a parte de baixo tocando em alguma coisa
-    if((this.jumpButton.isDown || this.keys.up.isDown) && (this.player.body.touching.down || this.player.body.onFloor())){
-        // Adicione uma velocidade no eixo Y, fazendo o jogador pular
-        this.player.body.velocity.y = -400;
-        // Tocando o som de pulo
+    if((this.jumpButton.isDown || this.keys.up.isDown) && (this.astronaut.body.touching.down || this.astronaut.body.onFloor())){
+        this.astronaut.body.velocity.y = -400;
         this.jumpSound.play();
     }
 
-    // Se o jogador não estiver no chão, inicie a animação 'jump'
-    if(!this.player.body.touching.down && !this.player.body.onFloor()){
-        this.player.animations.play('jump');
+    if(!this.astronaut.body.touching.down && !this.astronaut.body.onFloor()){
+       this.astronaut.animations.play('jump');
     }
     
-    // Para cada morcego, verificar em que sentido ele está indo
-    // Se a velocidade for positiva, a escala no eixo X será 1, caso
-    // contrário -1
+   
     this.bats.forEach(function(bat){
        if(bat.body.velocity.x != 0) {
-           // Math.sign apenas retorna o sinal do parâmetro: positivo retorna 1, negativo -1
            bat.scale.x = 1 * Math.sign(bat.body.velocity.x);
        }
     });
     
-    this.oxygen -= 0.01;
-    this.oxText.text = "Oxygen: " + this.oxygen.toPrecision(2);
-    
-    if(this.oxygen <= 0)
-        {
-            this.music.stop(); 
-            this.lose();
-        }
+   this.updatingOxygen();
+   
 }
 
-// Tratamento da colisão entre o jogador e os diamantes
-// As funções para esse fim sempre recebem os dois objetos que colidiram,
-// e então podemos manipular tais objetos
+GameState.prototype.updatingOxygen = function()
+{
+     this.oxygen -= 0.01;
+        this.oxText.text = "Oxygen: " + this.oxygen.toPrecision(2);
+
+        if(this.oxygen <= 0)
+            {
+                this.music.stop(); 
+                this.lose();
+            }
+}
+
+GameState.prototype.updatingGun = function()
+{
+    this.playerGun.x = this.astronaut.x;
+    this.playerGun.y = this.astronaut.y;
+    
+    if(this.game.input.activePointer.x < this.playerGun.x)
+        {
+            this.playerGun.scale.y = -1;
+            this.astronaut.scale.x = -1;
+        }
+    else
+        {
+            this.playerGun.scale.y = 1;
+            this.astronaut.scale.x = 1;
+        }
+    this.playerGun.rotation = this.game.physics.arcade.angleToPointer(this.playerGun);
+}
+
 GameState.prototype.oxPillCollect = function(player, oxPill){
     
     this.oxygen += 5;
@@ -274,17 +262,16 @@ GameState.prototype.oxPillCollect = function(player, oxPill){
             this.oxygen = 99;
         }
     
-    this.pickupSound.play(); // som de pegar o diamante
+    this.pickupSound.play();
     oxPill.kill();
 }
 
-// Tratamento da colisão entre o jogador e os diamantes
+
 GameState.prototype.batCollision = function(player, bat){
-    // Se o jogador colidir por baixo e o morcego por cima, isso indica que o jogador pulou
-    // em cima do morcego, nesse caso vamos "matar" o morcego
+    
     if(player.body.touching.down && bat.body.touching.up){
-        this.enemyDeathSound.play(); // tocando som de morte do morcego
-        this.player.body.velocity.y = -200; // adicionando um pequeno impulso vertical ao jogador
+        this.enemyDeathSound.play(); 
+        this.astronaut.body.velocity.y = -200;
         bat.kill();
     }
     else 
@@ -295,16 +282,13 @@ GameState.prototype.batCollision = function(player, bat){
     }
 }
 
-// Tratamento da colisão entre o jogador e os diamantes
-// Nesse caso, apenas desligamos a colisão com a lava para evitar chamar o evento
-// repetidas vezes, e vamos para a condição de derrota
+
 GameState.prototype.lavaDeath = function(player, lava){
     this.level1.setCollision([5, 6, 13], false, this.lavaLayer);
-    this.music.stop(); // parando a música
+    this.music.stop();
     this.lose();
 }
 
-// Condição de derrota: guarde o score e siga para o próximo estado
 GameState.prototype.lose = function(){
     this.playerDeathSound.play();
     this.game.state.start('lose');

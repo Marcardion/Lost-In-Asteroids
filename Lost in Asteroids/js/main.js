@@ -9,7 +9,7 @@ var Globals = {
 
 // Criação do objeto principal do Phaser: Phaser.game
 // parâmetros: largura, altura, tipo de renderização, ID do div
-var game = new Phaser.Game(640, 480, Phaser.AUTO, 'phaser-canvas');
+var game = new Phaser.Game(1024, 768, Phaser.AUTO, 'phaser-canvas');
 
 // Adicionando os states do nosso jogos no objeto game
 // Os states já deverão ter sido criados anteriormente
