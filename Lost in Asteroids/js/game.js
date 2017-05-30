@@ -32,6 +32,7 @@ GameState.prototype.preload = function() {
     // Para carregar os sons, basta informar a chave e dizer qual é o arquivo
     this.game.load.audio('jumpSound', 'Assets/sounds/jump.wav');
     this.game.load.audio('oxPillSound', 'Assets/sounds/ox_pill.ogg');
+    this.game.load.audio('plasmaGunSound', 'Assets/sounds/plasma_gun.ogg');
     this.game.load.audio('playerDeath', 'Assets/sounds/hurt3.ogg');
     this.game.load.audio('enemyDeath', 'Assets/sounds/hit2.ogg');
     this.game.load.audio('music', 'Assets/sounds/phantom_from_space.ogg');
@@ -41,7 +42,7 @@ GameState.prototype.create = function() {
     
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    this.SHOT_DELAY = 300; // milliseconds (10 bullets/3 seconds)
+    this.SHOT_DELAY = 1000; // milliseconds (10 bullets/3 seconds)
     this.BULLET_SPEED = 400; // pixels/second
     this.NUMBER_OF_BULLETS = 20;
     this.GRAVITY = 400; // pixels/second/second
@@ -197,6 +198,7 @@ GameState.prototype.create = function() {
     this.oxPillSound = this.game.add.audio('oxPillSound');
     this.playerDeathSound = this.game.add.audio('playerDeath');
     this.enemyDeathSound = this.game.add.audio('enemyDeath');
+    this.plasmaGunSound = this.game.add.audio('plasmaGunSound');
     
     // Música de fundo - criada da mesma forma, mas com o parâmetro loop = true
     this.music = this.game.add.audio('music');
@@ -392,6 +394,8 @@ GameState.prototype.shootBullet = function() {
     // Shoot it in the right direction
     bullet.body.velocity.x = Math.cos(bullet.rotation) * this.BULLET_SPEED;
     bullet.body.velocity.y = Math.sin(bullet.rotation) * this.BULLET_SPEED;
+    
+    this.plasmaGunSound.play();
 };
 
 GameState.prototype.getExplosion = function(x, y) {
