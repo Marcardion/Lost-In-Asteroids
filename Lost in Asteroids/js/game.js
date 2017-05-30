@@ -188,8 +188,8 @@ GameState.prototype.create = function() {
 
 GameState.prototype.update = function() {
     
-    this.game.debug.body(this.bullet);
-    this.game.debug.body(this.astronaut);
+   // this.game.debug.body(this.bullet);
+   // this.game.debug.body(this.astronaut);
 
     this.updatingGun();
     
@@ -206,39 +206,21 @@ GameState.prototype.update = function() {
     
     if(this.keys.left.isDown){
         this.astronaut.body.velocity.x = -150;
-        if(this.astronaut.scale.x == -1)
-            {
-               this.astronaut.animations.play('walk'); 
-            }
-        else
-            {
-               this.astronaut.animations.play('walkb');  
-            }
     }
     else if(this.keys.right.isDown){
         this.astronaut.body.velocity.x = 150;  
-        if(this.astronaut.scale.x == -1)
-            {
-               this.astronaut.animations.play('walkb'); 
-            }
-        else
-            {
-               this.astronaut.animations.play('walk');  
-            }
     }
     else {
         this.astronaut.body.velocity.x = 0;
-        this.astronaut.animations.play('idle');
     }
 
     if((this.jumpButton.isDown || this.keys.up.isDown) && (this.astronaut.body.touching.down || this.astronaut.body.onFloor())){
         this.astronaut.body.velocity.y = -400;
         this.jumpSound.play();
     }
+    
+    this.playerAnimations();
 
-    if(!this.astronaut.body.touching.down && !this.astronaut.body.onFloor()){
-       this.astronaut.animations.play('jump');
-    }
     
    
     this.bats.forEach(function(bat){
@@ -249,6 +231,36 @@ GameState.prototype.update = function() {
     
    this.updatingOxygen();
    
+}
+
+GameState.prototype.playerAnimations = function()
+{
+     if(!this.astronaut.body.touching.down && !this.astronaut.body.onFloor()){
+       this.astronaut.animations.play('jump');
+    }
+    else if(this.keys.left.isDown){
+        if(this.astronaut.scale.x == -1)
+            {
+               this.astronaut.animations.play('walk'); 
+            }
+        else
+            {
+               this.astronaut.animations.play('walkb');  
+            }
+    }
+    else if(this.keys.right.isDown){
+        if(this.astronaut.scale.x == -1)
+            {
+               this.astronaut.animations.play('walkb'); 
+            }
+        else
+            {
+               this.astronaut.animations.play('walk');  
+            }
+    }
+    else {
+        this.astronaut.animations.play('idle');
+    }
 }
 
 GameState.prototype.updatingOxygen = function()
