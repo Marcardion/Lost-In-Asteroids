@@ -18,6 +18,7 @@ GameState.prototype.preload = function() {
     // Para carregar um spritesheet, é necessário saber a altura e largura de cada sprite, e o número de sprites no arquivo
     // No caso do player.png, os sprites são de 32x32 pixels, e há 8 sprites no arquivo
     
+    this.game.load.image('parallax-bg', 'Assets/spritesheets/background_parallax.png');
     this.game.load.spritesheet('astronaut', 'Assets/spritesheets/astronaut.png', 96, 96, 24);
     this.game.load.spritesheet('enemy', 'Assets/spritesheets/enemy.png', 96, 96, 7);
     this.game.load.spritesheet('player', 'Assets/spritesheets/player.png', 32, 32, 8);
@@ -53,7 +54,18 @@ GameState.prototype.create = function() {
     // 3 - Criar os layers do mapa
     // A ordem nesse caso é importante, então os layers que ficarão no "fundo" deverão ser
     // criados primeiro, e os que ficarão na "frente" por último;
+    
+    
     this.bgLayer = this.level1.createLayer('BG');
+    
+    //Background
+    this.backgroundParallax = this.game.add.tileSprite(0, 
+        this.game.height - this.game.cache.getImage('parallax-bg').height, 
+        this.game.width, 
+        this.game.cache.getImage('parallax-bg').height, 
+        'parallax-bg'
+    );
+    
     this.lavaLayer = this.level1.createLayer('Lava');
     this.wallsLayer = this.level1.createLayer('Walls');
     
@@ -62,6 +74,10 @@ GameState.prototype.create = function() {
 
     // Redimensionando o tamanho do "mundo" do jogo
     this.wallsLayer.resizeWorld();
+    
+    
+    
+    
     
     // Para que possamos detectar colisões dos objetos com os layers do mapa, primeiro precisamos
     // informar quais tiles deverão efetivamente ter um colisor, para cada layer.
