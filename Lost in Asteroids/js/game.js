@@ -25,6 +25,9 @@ GameState.prototype.preload = function() {
     this.game.load.spritesheet('plasmaBullets', 'Assets/spritesheets/plasma_bullet.png', 64, 64, 7);
     this.game.load.spritesheet('items', 'Assets/spritesheets/pickupItems.png', 32, 32, 6);
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
+    this.game.load.image('splash', 'Assets/spritesheets/splash.png');
+    
+    
     
     // Para carregar um arquivo do Tiled, o mesmo precisa estar no formato JSON
     this.game.load.tilemap('level1', 'Assets/maps/level1.json', null, Phaser.Tilemap.TILED_JSON);
@@ -42,10 +45,14 @@ GameState.prototype.create = function() {
     
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
+    
+    
     this.SHOT_DELAY = 1000; // milliseconds (10 bullets/3 seconds)
     this.BULLET_SPEED = 400; // pixels/second
     this.NUMBER_OF_BULLETS = 20;
     this.GRAVITY = 400; // pixels/second/second
+    
+    
     
     // Para carregar o mapa do Tiled para o Phaser, 3 estágios são necessários:
     // 1 - Criar um objeto com o arquivo do Tiled carregado no preload()
@@ -121,8 +128,13 @@ GameState.prototype.create = function() {
         
         bullet.body.setSize(32,32, 15, 15);
         
+        
+        
         bullet.animations.add('spark', [0, 1, 2, 3, 4], 6, true);
         bullet.animations.play('spark');
+        
+        
+        
         
         bullet.body.gravity.y = this.GRAVITY;
 
@@ -224,6 +236,13 @@ GameState.prototype.create = function() {
     
     
     this.explosionGroup = this.game.add.group();
+    
+    //create particle
+    this.particleEmitter = this.game.add.emitter(0, 0, 20);
+    // Utilizando o asset particle para compor as partículas
+    this.particleEmitter.makeParticles('splash');
+    
+    
 
 }
 
@@ -244,10 +263,25 @@ GameState.prototype.update = function() {
     
      this.game.physics.arcade.collide(this.bulletPool, this.wallsLayer, function(bullet, walls) {
         // Create an explosion
-       // this.getExplosion(bullet.x, bullet.y);
+        this.getExplosion(bullet);
 
         // Kill the bullet
-        bullet.kill();
+        //bullet.kill();
+        
+         //bullet animation
+    //    bullet.animations.play('explosion');
+        
+        this.particleEmitter.x = bullet.x;
+        this.particleEmitter.y = bullet.y; 
+        this.particleEmitter.start(true, 1000, false, 1000);
+         
+         
+         
+         bullet.kill();
+        //bullet.physics == null;
+       // bullet.body.immovable = true;
+         
+         
     }, null, this);
     
      this.bulletPool.forEachAlive(function(bullet) {
@@ -398,18 +432,27 @@ GameState.prototype.shootBullet = function() {
     this.plasmaGunSound.play();
 };
 
-GameState.prototype.getExplosion = function(x, y) {
+GameState.prototype.getExplosion = function(bullet) {
     // Get the first dead explosion from the explosionGroup
+    
+    
+    
     var explosion = this.explosionGroup.getFirstDead();
-
+    
     // If there aren't any available, create a new one
     if (explosion === null) {
-        explosion = this.game.add.sprite(0, 0, 'explosion');
+        explosion = this.game.add.sprite(0, 0, 'plasmaBullets');
+        
+        
+        
         explosion.anchor.setTo(0.5, 0.5);
 
         // Add an animation for the explosion that kills the sprite when the
         // animation is complete
-        var animation = explosion.animations.add('boom', [0,1,2,3], 60, false);
+        
+        
+        
+        var animation = explosion.animations.add('boom', [5, 6], 12, false);
         animation.killOnComplete = true;
 
         // Add the explosion sprite to the group
@@ -422,8 +465,8 @@ GameState.prototype.getExplosion = function(x, y) {
     explosion.revive();
 
     // Move the explosion to the given coordinates
-    explosion.x = x;
-    explosion.y = y;
+    explosion.x = bullet.x;
+    explosion.y = bullet.y;
 
     // Set rotation of the explosion at random for a little variety
     explosion.angle = this.game.rnd.integerInRange(0, 360);
@@ -431,6 +474,8 @@ GameState.prototype.getExplosion = function(x, y) {
     // Play the animation
     explosion.animations.play('boom');
 
+    
+    
     // Return the explosion itself in case we want to do anything else with it
     return explosion;
 };
