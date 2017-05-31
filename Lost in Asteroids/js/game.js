@@ -148,8 +148,8 @@ GameState.prototype.create = function() {
     this.playerGun.anchor.setTo(0.5, 0.6);
     
     this.astronaut.animations.add('idle', [0, 1, 2], 6);
-    this.astronaut.animations.add('walk', [3, 4, 5], 6);
-    this.astronaut.animations.add('walkb', [16, 17, 18], 6);
+    this.astronaut.animations.add('walk', [3, 4, 5], 8);
+    this.astronaut.animations.add('walkb', [16, 17, 18], 8);
     this.astronaut.animations.add('jump', [9, 10, 11], 6);
     //COLOCAR DEATH AQUI DEPOIS
     
@@ -222,11 +222,11 @@ GameState.prototype.create = function() {
     // A linha abaixo adiciona um texto na tela, e a próxima faz com o que o texto fique
     // fixo na câmera, dessa forma não vai se deslocar quando a câmera mudar
     this.oxText = this.game.add.text(50, 50, "Oxygen: 0", 
-                            {font: "25px Arial", fill: "#ffffff"});
+                            {font: "25px Roboto", fill: "#ffffff"});
     this.oxText.fixedToCamera = true;
     
     this.ammoText = this.game.add.text(50, 100, "Ammo: 0", 
-                            {font: "25px Arial", fill: "#ffffff"});
+                            {font: "25px Roboto", fill: "#ffffff"});
     this.ammoText.fixedToCamera = true;
     
     // Estado do jogo - Variáveis para guardar quaisquer informações pertinentes para as condições de 

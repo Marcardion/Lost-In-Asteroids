@@ -22,7 +22,7 @@ TitleState.prototype.create = function() {
     this.mainTitle = this.game.add.sprite(0, 0, 'startImage');
     
      // Adicionando textos
-    this.startText = this.game.add.text(512, 700, "PRESS ENTER TO START", {font: "35px Arial", fill: "#ffffff"});
+    this.startText = this.game.add.text(520, 700, "PRESS ENTER TO START", {font: "35px Roboto", fill: "#ffffff"});
     this.startText.anchor.setTo(0.5, 0.5);
     // Capturando tecla enter para uso posterior
     this.returnKey = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
