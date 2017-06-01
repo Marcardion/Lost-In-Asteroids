@@ -301,6 +301,30 @@
                  "width":32,
                  "x":1598.66666666667,
                  "y":729.333333333333
+                }, 
+                {
+                 "gid":43,
+                 "height":32,
+                 "id":57,
+                 "name":"oxPill",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":1109.33333333333,
+                 "y":145.333333333333
+                }, 
+                {
+                 "gid":49,
+                 "height":32,
+                 "id":58,
+                 "name":"ammo",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":1390.66666666667,
+                 "y":117.333333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -320,7 +344,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":57,
+ "nextobjectid":59,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tileheight":32,
