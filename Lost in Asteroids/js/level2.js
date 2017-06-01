@@ -25,17 +25,18 @@ Level2State.prototype.preload = function() {
     this.game.load.spritesheet('plasmaBullets', 'Assets/spritesheets/plasma_bullet.png', 64, 64, 7);
     this.game.load.spritesheet('items', 'Assets/spritesheets/pickupItems.png', 32, 32, 6);
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
-    this.game.load.spritesheet('gosmas', 'Assets/spritesheets/enemy.png', 96, 96, 7);
+    this.game.load.spritesheet('tiles', 'Assets/spritesheets/tiles.png', 32, 32, 66);    
     this.game.load.image('splash', 'Assets/spritesheets/splash.png');
     
     
     
     // Para carregar um arquivo do Tiled, o mesmo precisa estar no formato JSON
-    this.game.load.tilemap('level2', 'Assets/maps/level4.json', null, Phaser.Tilemap.TILED_JSON);
+    this.game.load.tilemap('level2', 'Assets/maps/level2.json', null, Phaser.Tilemap.TILED_JSON);
 
     // Para carregar os sons, basta informar a chave e dizer qual é o arquivo
     this.game.load.audio('jumpSound', 'Assets/sounds/jump.wav');
     this.game.load.audio('oxPillSound', 'Assets/sounds/ox_pill.ogg');
+    this.game.load.audio('ammoPickupSound', 'Assets/sounds/ammo_pickup.ogg');
     this.game.load.audio('plasmaGunSound', 'Assets/sounds/plasma_gun.ogg');
     this.game.load.audio('playerDeath', 'Assets/sounds/hurt3.ogg');
     this.game.load.audio('enemyDeath', 'Assets/sounds/hit2.ogg');
@@ -68,9 +69,7 @@ Level2State.prototype.create = function() {
     // criados primeiro, e os que ficarão na "frente" por último;
     
     
-    //this.bgLayer = this.level2.createLayer('BG');
-    
-    
+    this.bgLayer = this.level2.createLayer('BG');
     
     //Background
     this.backgroundParallax = this.game.add.tileSprite(0, 
@@ -79,7 +78,6 @@ Level2State.prototype.create = function() {
         this.game.cache.getImage('parallax-bg').height, 
         'parallax-bg'
     );
-    
     
     this.iceLayer = this.level2.createLayer('Ice');
     this.lavaLayer = this.level2.createLayer('Lava');
@@ -100,7 +98,6 @@ Level2State.prototype.create = function() {
     // Os parâmetros são a lista dos tiles, "true" indicando que a colisão deve ser ativada,
     // e o nome do layer.
     
-    
     this.level2.setCollisionByExclusion([17, 18, 30, 36, 42, 43, 44, 45, 49, 50, 51,      58, 59, 60,    64, 65, 66], true, this.wallsLayer);
     this.level2.setCollisionByExclusion([17, 18, 30, 36, 42, 43, 44, 45, 49, 50, 51,      58, 59, 60,    64, 65, 66], true, this.iceLayer);
     
@@ -108,8 +105,7 @@ Level2State.prototype.create = function() {
     // informar diretamente quais são.
     this.level2.setCollision([58, 59, 60,    64, 65, 66], true, this.lavaLayer);
     
-    
-    this.astronaut = this.game.add.sprite(500,200, 'astronaut', 1);
+    this.astronaut = this.game.add.sprite(50, 50, 'astronaut', 1);
     this.astronaut.anchor.setTo(0.5,0.5);
     this.game.physics.enable(this.astronaut);
     this.astronaut.body.gravity.y = 400;
@@ -117,11 +113,7 @@ Level2State.prototype.create = function() {
     // Corrigindo o bounding box do personagem
     this.astronaut.body.setSize(30,80, 35, 16);
     
-    /*
-    this.bullet = this.game.add.sprite(500,200, 'plasmaBullets', 1);
-    this.bullet.anchor.setTo(0.5,0.5);
-    this.game.physics.enable(this.bullet);
-    this.bullet.body.setSize(32,32, 15, 15);*/
+   
     
      this.bulletPool = this.game.add.group();
     for(var i = 0; i < this.NUMBER_OF_BULLETS; i++) {
@@ -172,12 +164,6 @@ Level2State.prototype.create = function() {
                     };
     this.jumpButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     
-    // Adicionando objetos do Tiled, utilizando grupos
-    // Um grupo é como se fosse um array de sprites, mas com várias facilidades adicionais, 
-    // como por exemplo alterar atributos e facilitar detectar colisões com objetos do grupo
-    // Especificamente, estamos criando physicsGroups, que já armazenam objetos com física ativada
-    // https://photonstorm.github.io/phaser-ce/Phaser.GameObjectFactory.html#physicsGroup
-    
     // Criando objetos que foram criados em um layer de objetos do Tiled
     // Parâmetros do createFromObjects():
     // nome do layer do Tiled de onde vamos criar os objetos
@@ -188,7 +174,7 @@ Level2State.prototype.create = function() {
     // grupo - qual grupo do Phaser devemos adicionar esses objetos
     
     this.oxPills = this.game.add.physicsGroup();
-    this.level2.createFromObjects('Items', 'diamond', 'items', 5, true, false, this.oxPills);
+    this.level2.createFromObjects('Items', 'oxPill', 'items', 5, true, false, this.oxPills);
     // Para cada objeto do grupo, vamos executar uma função
     this.oxPills.forEach(function(oxPill){
         // body.immovable = true indica que o objeto não é afetado por forças externas
@@ -197,55 +183,31 @@ Level2State.prototype.create = function() {
         oxPill.animations.add('spin', [0,1,2], 6, true);
         oxPill.animations.play('spin');
     });
-
-    // Grupo de morcegos:
-    this.bats = this.game.add.physicsGroup();
-    this.level2.createFromObjects('Enemies', 'bat', 'enemies', 8, true, false, this.bats);
-    this.bats.forEach(function(bat){
-        bat.anchor.setTo(0.5, 0.5);
-        bat.body.immovable = true;
-        bat.animations.add('fly', [8, 9, 10], 6, true);
-        bat.animations.play('fly');
-        // Velocidade inicial do inimigo
-        bat.body.velocity.x = 100;
-        // bounce.x=1 indica que, se o objeto tocar num objeto no eixo x, a força deverá
-        // ficar no sentido contrário; em outras palavras, o objeto é perfeitamente elástico
-        bat.body.bounce.x = 1;
+    
+    this.ammoPickups = this.game.add.physicsGroup();
+    this.level2.createFromObjects('Items', 'ammo', 'items', 5, true, false, this.ammoPickups);
+    // Para cada objeto do grupo, vamos executar uma função
+    this.ammoPickups.forEach(function(ammoPickup){
+        // body.immovable = true indica que o objeto não é afetado por forças externas
+        ammoPickup.body.immovable = true;
+        // Adicionando animações; o parâmetro true indica que a animação é em loop
+        ammoPickup.animations.add('spin', [3,4,5], 6, true);
+        ammoPickup.animations.play('spin');
+    });
+    
+    this.endGameGoal = this.game.add.physicsGroup();
+    this.level2.createFromObjects('Items', 'endGoal', 'tiles', 23, true, false, this.endGameGoal);
+    // Para cada objeto do grupo, vamos executar uma função
+    this.endGameGoal.forEach(function(goal){
+        
+        goal.body.immovable = true;
     });
 
-    
-    // Grupo de gosmas:
-    this.gosmas = this.game.add.physicsGroup();
-    this.level2.createFromObjects('Enemies', 'gosma', 'gosmas', 8, true, false, this.gosmas);
-    this.gosmas.forEach(function(gosma){
-        gosma.anchor.setTo(0.5, 0);
-        gosma.body.immovable = true;
-        
-         var rndGosma = game.rnd.integerInRange(1, 3);
-        
-        if(rndGosma == 1){
-            gosma.animations.add('drag', [1, 2], 6, true);
-        }else if(rndGosma == 2){
-            gosma.animations.add('drag', [3, 4], 6, true);
-        }else{
-            gosma.animations.add('drag', [5, 6], 6, true);  
-        }
-        
-        
-        
-        gosma.animations.play('drag');
-        // Velocidade inicial do inimigo
-        gosma.body.velocity.x = 100;
-        // bounce.x=1 indica que, se o objeto tocar num objeto no eixo x, a força deverá
-        // ficar no sentido contrário; em outras palavras, o objeto é perfeitamente elástico
-        gosma.body.bounce.x = 1;
-    });
-
-    
     // Criando assets de som com this.game.add.audio()
     // O parâmetro é o nome do asset definido no preload()
     this.jumpSound = this.game.add.audio('jumpSound');
     this.oxPillSound = this.game.add.audio('oxPillSound');
+    this.ammoPickupSound = this.game.add.audio('ammoPickupSound');
     this.playerDeathSound = this.game.add.audio('playerDeath');
     this.enemyDeathSound = this.game.add.audio('enemyDeath');
     this.plasmaGunSound = this.game.add.audio('plasmaGunSound');
@@ -253,7 +215,6 @@ Level2State.prototype.create = function() {
     // Música de fundo - criada da mesma forma, mas com o parâmetro loop = true
     this.music = this.game.add.audio('music');
     this.music.loop = true;
-    // Já iniciamos a música aqui mesmo pra ficar tocando ao fundo
     this.music.play();
     
     // HUD de score
@@ -271,12 +232,13 @@ Level2State.prototype.create = function() {
     // vitória/derrota, ações do jogador, etc
     this.oxygen = 10;
     this.weaponAmmo = 0;
+    this.reloadtimer = 0;
     
     
     this.explosionGroup = this.game.add.group();
     
     //create particle
-    this.particleEmitter = this.game.add.emitter(0, 0, 15);
+    this.particleEmitter = this.game.add.emitter(0, 0, 20);
     // Utilizando o asset particle para compor as partículas
     this.particleEmitter.makeParticles('splash');
     
@@ -297,46 +259,21 @@ Level2State.prototype.update = function() {
     this.game.physics.arcade.collide(this.astronaut, this.lavaLayer, this.lavaDeath, null, this);
    
     this.game.physics.arcade.overlap(this.astronaut, this.oxPills, this.oxPillCollect, null, this);
-    
-    this.game.physics.arcade.overlap(this.astronaut, this.bats, this.batCollision, null, this);
-    
-    this.game.physics.arcade.overlap(this.astronaut, this.gosmas, this.gosmaCollision, null, this);
+    this.game.physics.arcade.overlap(this.astronaut, this.ammoPickups, this.ammoCollect, null, this);
+    this.game.physics.arcade.overlap(this.astronaut, this.endGameGoal, this.loadNextLevel, null, this);
     
      this.game.physics.arcade.collide(this.bulletPool, this.wallsLayer, function(bullet, walls) {
         // Create an explosion
         this.getExplosion(bullet);
-
-        // Kill the bullet
-        //bullet.kill();
         
-         //bullet animation
-    //    bullet.animations.play('explosion');
-        
-       /* this.particleEmitter.x = bullet.x;
-        this.particleEmitter.y = bullet.y; 
-        this.particleEmitter.start(true, 1000, false, 1000);
-         */
-         
-         
-         bullet.kill();
-        //bullet.physics == null;
-       // bullet.body.immovable = true;
-         
+        bullet.kill();
          
     }, null, this);
-    
-    
     
      this.game.physics.arcade.collide(this.bulletPool, this.iceLayer, function(bullet, walls) {
         // Create an explosion
         this.getExplosion(bullet);
 
-        // Kill the bullet
-        //bullet.kill();
-        
-         //bullet animation
-    //    bullet.animations.play('explosion');
-        
         this.particleEmitter.x = bullet.x;
         this.particleEmitter.y = bullet.y; 
         this.particleEmitter.start(true, 1000, false, 500);
@@ -347,53 +284,18 @@ Level2State.prototype.update = function() {
          
          bullet.kill();
          
-        //bullet.physics == null;
-       // bullet.body.immovable = true;
-         
-         
     }, null, this);
-    
-    
-     this.game.physics.arcade.collide(this.bulletPool, this.gosmas, function(bullet, gosma) {
-        // Create an explosion
-        this.getExplosion(bullet);
-
-        // Kill the bullet
-        //bullet.kill();
-        
-         //bullet animation
-    //    bullet.animations.play('explosion');
-        
-       /* this.particleEmitter.x = bullet.x;
-        this.particleEmitter.y = bullet.y; 
-        this.particleEmitter.start(true, 1000, false, 500);
-        */
-         
-         gosma.kill();
-         
-         bullet.kill();
-         
-        //bullet.physics == null;
-       // bullet.body.immovable = true;
-         
-         
-    }, null, this);
-    
-    
     
      this.bulletPool.forEachAlive(function(bullet) {
         bullet.rotation = Math.atan2(bullet.body.velocity.y, bullet.body.velocity.x);
     }, this);
     
     if (this.game.input.activePointer.isDown) {
-        this.shootBullet();
+        if(this.weaponAmmo > 0)
+            {
+               this.shootBullet(); 
+            }
     }
-    
-    this.game.physics.arcade.collide(this.bats, this.wallsLayer);
-    this.game.physics.arcade.collide(this.gosmas, this.wallsLayer);
-    this.game.physics.arcade.collide(this.gosmas, this.iceLayer);
-    
-    
     
     if(this.keys.left.isDown){
         this.astronaut.body.velocity.x = -150;
@@ -412,22 +314,7 @@ Level2State.prototype.update = function() {
     
     this.playerAnimations();
 
-    
-   
-    this.bats.forEach(function(bat){
-       if(bat.body.velocity.x != 0) {
-           bat.scale.x = 1 * Math.sign(bat.body.velocity.x);
-       }
-    });
-    
-    this.gosmas.forEach(function(gosma){
-       if(gosma.body.velocity.x != 0) {
-           gosma.scale.x = 1 * Math.sign(gosma.body.velocity.x);
-       }
-    });
-    
-    
-   this.updatingOxygen();
+    this.updatingOxygen();
    
 }
 
@@ -471,6 +358,27 @@ Level2State.prototype.updatingOxygen = function()
                 this.music.stop(); 
                 this.lose();
             }
+    
+        this.reloadWeapon();
+}
+
+Level2State.prototype.reloadWeapon = function()
+{
+    this.reloadtimer += 0.01;
+    if(this.reloadtimer >= 10)
+        {
+            this.weaponAmmo += 1;
+            if(this.weaponAmmo > 99)
+             {
+            this.weaponAmmo = 99;
+             }
+    
+            this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+    
+            this.ammoPickupSound.play();
+            
+            this.reloadtimer = 0;
+        }
 }
 
 Level2State.prototype.updatingGun = function()
@@ -478,7 +386,7 @@ Level2State.prototype.updatingGun = function()
     this.playerGun.x = this.astronaut.x;
     this.playerGun.y = this.astronaut.y;
     
-    if(this.game.input.activePointer.x < this.playerGun.x)
+    if(this.game.input.activePointer.worldX < this.playerGun.x)
         {
             this.playerGun.scale.y = -1;
             this.astronaut.scale.x = -1;
@@ -501,6 +409,20 @@ Level2State.prototype.oxPillCollect = function(player, oxPill){
     
     this.oxPillSound.play();
     oxPill.kill();
+}
+
+Level2State.prototype.ammoCollect = function(player, ammo){
+    
+    this.weaponAmmo += 8;
+    if(this.weaponAmmo > 99)
+        {
+            this.weaponAmmo = 99;
+        }
+    
+    this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+    
+    this.ammoPickupSound.play();
+    ammo.kill();
 }
 
 Level2State.prototype.shootBullet = function() {
@@ -538,6 +460,8 @@ Level2State.prototype.shootBullet = function() {
     bullet.body.velocity.y = Math.sin(bullet.rotation) * this.BULLET_SPEED;
     
     this.plasmaGunSound.play();
+    this.weaponAmmo -= 1;
+    this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
 };
 
 Level2State.prototype.getExplosion = function(bullet) {
@@ -588,47 +512,22 @@ Level2State.prototype.getExplosion = function(bullet) {
     return explosion;
 };
 
-Level2State.prototype.batCollision = function(player, bat){
-    
-    if(player.body.touching.down && bat.body.touching.up){
-        this.enemyDeathSound.play(); 
-        this.astronaut.body.velocity.y = -200;
-        bat.kill();
-    }
-    else 
-    {
-        this.oxygen -= 10;
-        this.enemyDeathSound.play();
-        bat.kill();
-    }
-}
-
-
-Level2State.prototype.gosmaCollision = function(player, gosma){
-    
-      //  this.oxygen -= 10;
-        //this.enemyDeathSound.play();
-        //gosma.kill();
-    
-    
-       this.playerDeathSound.play();
-       this.game.state.start('lose');
-    
-}
-
 
 Level2State.prototype.lavaDeath = function(player, lava){
     this.level2.setCollision([5, 6, 13], false, this.lavaLayer);
-    this.music.stop();
+   
     this.lose();
 }
 
 Level2State.prototype.lose = function(){
+    this.music.stop();
     this.playerDeathSound.play();
     this.game.state.start('lose');
 }
 
-
-
+Level2State.prototype.loadNextLevel = function(){
+    this.music.stop();
+    this.game.state.start('level2');
+}
 
 
