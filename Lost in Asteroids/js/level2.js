@@ -108,7 +108,7 @@ Level2State.prototype.create = function() {
     // informar diretamente quais são.
     this.level2.setCollision([58, 59, 60,    64, 65, 66], true, this.lavaLayer);
     
-    this.astronaut = this.game.add.sprite(50, 50, 'astronaut', 1);
+    this.astronaut = this.game.add.sprite(50, 900, 'astronaut', 1);
     this.astronaut.anchor.setTo(0.5,0.5);
     this.game.physics.enable(this.astronaut);
     this.astronaut.body.gravity.y = 400;
