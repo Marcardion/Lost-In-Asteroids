@@ -79,6 +79,8 @@ GameState.prototype.create = function() {
         'parallax-bg'
     );
     
+    this.backgroundParallax.fixedToCamera = true;
+    
     this.iceLayer = this.level1.createLayer('Ice');
     this.lavaLayer = this.level1.createLayer('Lava');
     this.wallsLayer = this.level1.createLayer('Walls');

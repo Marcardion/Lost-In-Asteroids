@@ -80,6 +80,8 @@ Level2State.prototype.create = function() {
         'parallax-bg'
     );
     
+    this.backgroundParallax.fixedToCamera = true;
+    
     this.iceLayer = this.level2.createLayer('Ice');
     this.lavaLayer = this.level2.createLayer('Lava');
     this.wallsLayer = this.level2.createLayer('Walls');
