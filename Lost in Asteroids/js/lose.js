@@ -12,21 +12,35 @@ var LoseState = function(game) {};
 
 // preload: carregar todos os assets necessários para esta scene ou para as próximas
 LoseState.prototype.preload = function() {
-    // Não há nenhum asset a ser carregado aqui, então a função fica vazia
+
+    this.game.load.image('gameover', 'Assets/images/gameover.png');
+    this.game.load.audio('music', 'Assets/sounds/static_motion.ogg');
 }
 
 // create: instanciar e inicializar todos os objetos dessa scene
 LoseState.prototype.create = function() {
+    
+     this.mainTitle = this.game.add.sprite(0, 0, 'gameover');
+    
     // Adicionando textos
-    this.game.add.text(200, 200, "You Lose :(", {font: "35px Arial", fill: "#ffffff"});
+    this.gameOverText = this.game.add.text(520, 100, "GAME OVER", {font: "50px Roboto", fill: "#ffffff"});
+    this.gameOverText.anchor.setTo(0.5, 0.5);
+    
+    this.tryAgainText = this.game.add.text(520, 200, "PRESS ENTER TO TRY AGAIN", {font: "35px Roboto", fill: "#ffffff"});
+    this.tryAgainText.anchor.setTo(0.5, 0.5);
     // Capturando tecla enter para uso posterior
     this.returnKey = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+    
+    this.music = this.game.add.audio('music');
+    this.music.loop = true;
+    this.music.play();
 }
 
 // update: o que fazer a cada quadro por segundo
 LoseState.prototype.update = function() {
     // Detectar se a tecla foi pressionada
     if(this.returnKey.isDown){
+        this.music.stop();
         this.game.state.start('game');
     }
 }
