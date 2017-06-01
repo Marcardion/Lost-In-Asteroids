@@ -25,6 +25,7 @@ Level2State.prototype.preload = function() {
     this.game.load.spritesheet('plasmaBullets', 'Assets/spritesheets/plasma_bullet.png', 64, 64, 7);
     this.game.load.spritesheet('items', 'Assets/spritesheets/pickupItems.png', 32, 32, 6);
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
+    this.game.load.spritesheet('gosmas', 'Assets/spritesheets/enemy.png', 96, 96, 7);
     this.game.load.spritesheet('tiles', 'Assets/spritesheets/tiles.png', 32, 32, 66);    
     this.game.load.image('splash', 'Assets/spritesheets/splash.png');
     
@@ -243,6 +244,34 @@ Level2State.prototype.create = function() {
     this.particleEmitter.makeParticles('splash');
     
     
+    
+    // Grupo de gosmas:
+    this.gosmas = this.game.add.physicsGroup();
+    this.level2.createFromObjects('Enemies', 'gosma', 'gosmas', 8, true, false, this.gosmas);
+    this.gosmas.forEach(function(gosma){
+        gosma.anchor.setTo(0.5, 0);
+        gosma.body.immovable = true;
+        
+         var rndGosma = game.rnd.integerInRange(1, 3);
+        
+        if(rndGosma == 1){
+            gosma.animations.add('drag', [1, 2], 6, true);
+        }else if(rndGosma == 2){
+            gosma.animations.add('drag', [3, 4], 6, true);
+        }else{
+            gosma.animations.add('drag', [5, 6], 6, true);  
+        }
+        
+        
+        
+        gosma.animations.play('drag');
+        // Velocidade inicial do inimigo
+        gosma.body.velocity.x = 100;
+        // bounce.x=1 indica que, se o objeto tocar num objeto no eixo x, a força deverá
+        // ficar no sentido contrário; em outras palavras, o objeto é perfeitamente elástico
+        gosma.body.bounce.x = 1;
+    });
+    
 
 }
 
@@ -255,10 +284,9 @@ Level2State.prototype.update = function() {
     
     this.game.physics.arcade.collide(this.astronaut, this.wallsLayer);
     this.game.physics.arcade.collide(this.astronaut, this.iceLayer);
-
     this.game.physics.arcade.collide(this.astronaut, this.lavaLayer, this.lavaDeath, null, this);
-   
     this.game.physics.arcade.overlap(this.astronaut, this.oxPills, this.oxPillCollect, null, this);
+    this.game.physics.arcade.overlap(this.astronaut, this.gosmas, this.gosmaCollision, null, this);
     this.game.physics.arcade.overlap(this.astronaut, this.ammoPickups, this.ammoCollect, null, this);
     this.game.physics.arcade.overlap(this.astronaut, this.endGameGoal, this.loadNextLevel, null, this);
     
@@ -286,6 +314,32 @@ Level2State.prototype.update = function() {
          
     }, null, this);
     
+     this.game.physics.arcade.collide(this.bulletPool, this.gosmas, function(bullet, gosma) {
+        // Create an explosion
+        this.getExplosion(bullet);
+
+        // Kill the bullet
+        //bullet.kill();
+        
+         //bullet animation
+    //    bullet.animations.play('explosion');
+        
+       /* this.particleEmitter.x = bullet.x;
+        this.particleEmitter.y = bullet.y; 
+        this.particleEmitter.start(true, 1000, false, 500);
+        */
+         
+         gosma.kill();
+         
+         bullet.kill();
+         
+        //bullet.physics == null;
+       // bullet.body.immovable = true;
+         
+         
+    }, null, this);
+    
+    
      this.bulletPool.forEachAlive(function(bullet) {
         bullet.rotation = Math.atan2(bullet.body.velocity.y, bullet.body.velocity.x);
     }, this);
@@ -296,6 +350,11 @@ Level2State.prototype.update = function() {
                this.shootBullet(); 
             }
     }
+    
+    this.game.physics.arcade.collide(this.gosmas, this.wallsLayer);
+    this.game.physics.arcade.collide(this.gosmas, this.iceLayer);
+
+    
     
     if(this.keys.left.isDown){
         this.astronaut.body.velocity.x = -150;
@@ -314,6 +373,12 @@ Level2State.prototype.update = function() {
     
     this.playerAnimations();
 
+    this.gosmas.forEach(function(gosma){
+       if(gosma.body.velocity.x != 0) {
+           gosma.scale.x = 1 * Math.sign(gosma.body.velocity.x);
+       }
+    });
+    
     this.updatingOxygen();
    
 }
@@ -511,6 +576,19 @@ Level2State.prototype.getExplosion = function(bullet) {
     // Return the explosion itself in case we want to do anything else with it
     return explosion;
 };
+
+
+Level2State.prototype.gosmaCollision = function(player, gosma){
+    
+      //  this.oxygen -= 10;
+        //this.enemyDeathSound.play();
+        //gosma.kill();
+    
+    
+       this.playerDeathSound.play();
+       this.game.state.start('lose');
+    
+}
 
 
 Level2State.prototype.lavaDeath = function(player, lava){
