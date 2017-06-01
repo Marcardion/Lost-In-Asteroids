@@ -28,6 +28,8 @@ Level2State.prototype.preload = function() {
     this.game.load.spritesheet('gosmas', 'Assets/spritesheets/enemy.png', 96, 96, 7);
     this.game.load.spritesheet('tiles', 'Assets/spritesheets/tiles.png', 32, 32, 66);    
     this.game.load.image('splash', 'Assets/spritesheets/splash.png');
+    this.game.load.image('oxImage', 'Assets/images/energy.png');
+    this.game.load.image('ammoImage', 'Assets/images/gem.png');
     
     
     
@@ -108,7 +110,7 @@ Level2State.prototype.create = function() {
     // informar diretamente quais são.
     this.level2.setCollision([58, 59, 60,    64, 65, 66], true, this.lavaLayer);
     
-    this.astronaut = this.game.add.sprite(50, 900, 'astronaut', 1);
+    this.astronaut = this.game.add.sprite(50, 50, 'astronaut', 1);
     this.astronaut.anchor.setTo(0.5,0.5);
     this.game.physics.enable(this.astronaut);
     this.astronaut.body.gravity.y = 400;
@@ -223,14 +225,21 @@ Level2State.prototype.create = function() {
     // HUD de score
     // A linha abaixo adiciona um texto na tela, e a próxima faz com o que o texto fique
     // fixo na câmera, dessa forma não vai se deslocar quando a câmera mudar
-    this.oxText = this.game.add.text(50, 50, "Oxygen: 0", 
+    
+    this.oxImage = this.game.add.sprite(50, 50, 'oxImage');
+    this.oxImage.fixedToCamera = true;
+    
+    this.oxText = this.game.add.text(130, 70, "0", 
                             {font: "25px Roboto", fill: "#ffffff"});
     this.oxText.fixedToCamera = true;
     
-    this.ammoText = this.game.add.text(50, 100, "Ammo: 0", 
+    
+    
+    this.ammoImage = this.game.add.sprite(45, 120, 'ammoImage');
+    this.ammoImage.fixedToCamera = true;
+    this.ammoText = this.game.add.text(130, 140, "0", 
                             {font: "25px Roboto", fill: "#ffffff"});
     this.ammoText.fixedToCamera = true;
-    
     // Estado do jogo - Variáveis para guardar quaisquer informações pertinentes para as condições de 
     // vitória/derrota, ações do jogador, etc
     this.oxygen = 10;
@@ -418,7 +427,7 @@ Level2State.prototype.playerAnimations = function()
 Level2State.prototype.updatingOxygen = function()
 {
      this.oxygen -= 0.01;
-        this.oxText.text = "Oxygen: " + this.oxygen.toPrecision(2);
+        this.oxText.text = this.oxygen.toPrecision(2);
 
         if(this.oxygen <= 0)
             {
@@ -440,7 +449,7 @@ Level2State.prototype.reloadWeapon = function()
             this.weaponAmmo = 99;
              }
     
-            this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+            this.ammoText.text = this.weaponAmmo.toPrecision(2);
     
             this.ammoPickupSound.play();
             
@@ -486,7 +495,7 @@ Level2State.prototype.ammoCollect = function(player, ammo){
             this.weaponAmmo = 99;
         }
     
-    this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+    this.ammoText.text = this.weaponAmmo.toPrecision(2);
     
     this.ammoPickupSound.play();
     ammo.kill();
@@ -528,7 +537,7 @@ Level2State.prototype.shootBullet = function() {
     
     this.plasmaGunSound.play();
     this.weaponAmmo -= 1;
-    this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+    this.ammoText.text = this.weaponAmmo.toPrecision(2);
 };
 
 Level2State.prototype.getExplosion = function(bullet) {

@@ -27,6 +27,9 @@ GameState.prototype.preload = function() {
     this.game.load.spritesheet('enemies', 'Assets/spritesheets/enemies.png', 32, 32, 12);
     this.game.load.spritesheet('tiles', 'Assets/spritesheets/tiles.png', 32, 32, 66);    
     this.game.load.image('splash', 'Assets/spritesheets/splash.png');
+    this.game.load.image('oxImage', 'Assets/images/energy.png');
+    this.game.load.image('ammoImage', 'Assets/images/gem.png');
+    
     
     
     
@@ -222,11 +225,19 @@ GameState.prototype.create = function() {
     // HUD de score
     // A linha abaixo adiciona um texto na tela, e a próxima faz com o que o texto fique
     // fixo na câmera, dessa forma não vai se deslocar quando a câmera mudar
-    this.oxText = this.game.add.text(50, 50, "Oxygen: 0", 
+    
+    this.oxImage = this.game.add.sprite(50, 50, 'oxImage');
+    this.oxImage.fixedToCamera = true;
+    
+    this.oxText = this.game.add.text(130, 70, "0", 
                             {font: "25px Roboto", fill: "#ffffff"});
     this.oxText.fixedToCamera = true;
     
-    this.ammoText = this.game.add.text(50, 100, "Ammo: 0", 
+    
+    
+    this.ammoImage = this.game.add.sprite(45, 120, 'ammoImage');
+    this.ammoImage.fixedToCamera = true;
+    this.ammoText = this.game.add.text(130, 140, "0", 
                             {font: "25px Roboto", fill: "#ffffff"});
     this.ammoText.fixedToCamera = true;
     
@@ -353,7 +364,7 @@ GameState.prototype.playerAnimations = function()
 GameState.prototype.updatingOxygen = function()
 {
      this.oxygen -= 0.01;
-        this.oxText.text = "Oxygen: " + this.oxygen.toPrecision(2);
+        this.oxText.text = this.oxygen.toPrecision(2);
 
         if(this.oxygen <= 0)
             {
@@ -375,7 +386,7 @@ GameState.prototype.reloadWeapon = function()
             this.weaponAmmo = 99;
              }
     
-            this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+            this.ammoText.text = this.weaponAmmo.toPrecision(2);
     
             this.ammoPickupSound.play();
             
@@ -421,7 +432,7 @@ GameState.prototype.ammoCollect = function(player, ammo){
             this.weaponAmmo = 99;
         }
     
-    this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+    this.ammoText.text = this.weaponAmmo.toPrecision(2);
     
     this.ammoPickupSound.play();
     ammo.kill();
@@ -463,7 +474,7 @@ GameState.prototype.shootBullet = function() {
     
     this.plasmaGunSound.play();
     this.weaponAmmo -= 1;
-    this.ammoText.text = "Ammo: " + this.weaponAmmo.toPrecision(2);
+    this.ammoText.text = this.weaponAmmo.toPrecision(2);
 };
 
 GameState.prototype.getExplosion = function(bullet) {

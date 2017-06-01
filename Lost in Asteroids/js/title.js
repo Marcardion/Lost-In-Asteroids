@@ -38,6 +38,6 @@ TitleState.prototype.update = function() {
     // Detectar se a tecla foi pressionada
     if(this.returnKey.isDown){
         this.music.stop();
-        this.game.state.start('level2');
+        this.game.state.start('game');
     }
 }
