@@ -1,6 +1,6 @@
 // Objeto para armazenar as variávels "globais" do jogo
 var Globals = { 
-    score: 0
+    myLevel: 'game'
 };
 
 // main.js: Neste arquivo criamos uma instância de Phaser.Game e 

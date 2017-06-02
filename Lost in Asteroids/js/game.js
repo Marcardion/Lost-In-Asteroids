@@ -48,6 +48,8 @@ GameState.prototype.preload = function() {
 
 GameState.prototype.create = function() { 
     
+    Globals.myLevel = 'game';
+    
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     

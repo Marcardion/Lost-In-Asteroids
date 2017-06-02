@@ -41,6 +41,6 @@ LoseState.prototype.update = function() {
     // Detectar se a tecla foi pressionada
     if(this.returnKey.isDown){
         this.music.stop();
-        this.game.state.start('game');
+        this.game.state.start(Globals.myLevel);
     }
 }

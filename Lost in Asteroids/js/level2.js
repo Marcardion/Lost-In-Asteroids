@@ -48,8 +48,10 @@ Level2State.prototype.preload = function() {
 
 Level2State.prototype.create = function() { 
     
+    Globals.myLevel = 'level2';
+    
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
-
+    
     
     
     this.SHOT_DELAY = 1000; // milliseconds (10 bullets/3 seconds)
