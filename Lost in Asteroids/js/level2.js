@@ -616,7 +616,7 @@ Level2State.prototype.lose = function(){
 
 Level2State.prototype.loadNextLevel = function(){
     this.music.stop();
-    this.game.state.start('level2');
+    this.game.state.start('credits');
 }
 
 
